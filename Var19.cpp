@@ -64,6 +64,50 @@ double* gauss(double kf[][N], double y[]) {
 	return x;
 }
 
+double* Zeidel(double kf[][N], double y[]) {
+	double eps = 0.00001;
+	double* x;
+	x = new double[N];
+	double max;
+	double counter = 0;
+	double temp;
+	//начальные Х
+	for (int i = 0; i < N; i++) {
+		x[i] = 0;
+	}
+	//Итерации
+	do {
+		for (int i = 1; i < N; i++) {
+			temp = x[i];
+			x[i] = y[i];
+			if (i != (N - 1)) {
+				for (int j = i + 1; j < N; j++) {
+					x[i] -= x[j] * kf[i][j];
+				}
+			}
+			if (i != 1) {
+				for (int j = i - 1; j > 0; j--) {
+					x[i] -= x[j] * kf[i][j];
+				}
+			}
+			x[i] = x[i] / kf[i][i];
+			//нахождение точности
+			if (i == 1) {
+				max = abs(x[i] - temp);
+			}
+			double l = abs(x[i] - temp);
+			if (l > max) {
+				max = l;
+			}
+		}
+
+		counter++;
+	} while ((max > eps)&&(counter < 100));
+	cout << "\nZeidel method" << endl;
+	cout << "Iterations = "<< counter << endl;
+	return x;
+}
+
 int main() {
 	double Kf[N][N];
 	double fi[N];
@@ -111,5 +155,42 @@ int main() {
 	cout << "Gauss method" << endl;
 	for (int i = 1; i < N; i++)
 		cout << "x" << i << " = " << x[i] << endl;
+
+	//////////////////////////////////////////////////
+	//////////////////////////////////////////////////
+
+	//Зануление всех коэффициентов
+	for (int i = 0; i < N; i++) {
+		for (int j = 0; j < N; j++) {
+			Kf[i][j] = 0;
+		}
+	}
+	//Присвоение b=10
+	for (int i = 1; i < N - 1; i++) {
+		Kf[i][i] = 10;
+	}
+	//Присвоение a=1
+	for (int i = 2; i < N - 1; i++) {
+		Kf[i][i - 1] = 1;
+	}
+	//Присвоение c=1
+	for (int i = 1; i < N - 1; i++) {
+		Kf[i][i + 1] = 1;
+	}
+	//Присвоение p=1
+	for (int i = 1; i < N; i++) {
+		Kf[N - 1][i] = 1;
+	}
+	//Присвоение fi=i
+	fi[0] = 0;
+	for (int i = 1; i < N; i++) {
+		fi[i] = i;
+	}
+	
+	x = Zeidel(Kf,fi);
+	
+	for (int i = 1; i < N; i++)
+		cout << "x" << i << " = " << x[i] << endl;
+
 	return 0;
 }

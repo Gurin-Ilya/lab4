@@ -255,12 +255,12 @@ int main() {
 		}
 	}*/
 	//cout << "||A|| = " << Norm(Kf)<<endl;
-	cout << "obuslovlennost = " << Obusl(Kf)<<endl<<endl;
+	
 	x = gauss(Kf, fi);
 	cout << "Gauss method" << endl;
 	for (int i = 1; i < N; i++)
 		cout << "x" << i << " = " << x[i] << endl;
-
+	cout << "\nobuslovlennost = " << Obusl(Kf)<<endl<<endl;
 	//////////////////////////////////////////////////
 	//////////////////////////////////////////////////
 

@@ -1,7 +1,7 @@
 #include <iostream>
 #include <cmath>
 using namespace std;
-const int N = 6;
+const int N = 101;
 
 double* gauss(double kf[][N], double y[]) {
 	double* x, max;
@@ -107,6 +107,110 @@ double* Zeidel(double kf[][N], double y[]) {
 	cout << "Iterations = "<< counter << endl;
 	return x;
 }
+//Функция вычисления нормы матрицы
+double Norm(double arr[][N]) {
+	double norm;
+	double sum[N] = {};
+	for (int i = 1; i < N; i++) {
+		for (int j = 1; j < N; j++) {
+			sum[i] += abs(arr[i][j]);
+		}
+	}
+
+	norm = sum[1];
+	for (int i = 2; i < N; i++) {
+		if (norm < sum[i]) {
+			norm = sum[i];
+		}
+	}
+	return norm;
+}
+double Norm2(double arr[N]) {
+	double norm;
+	norm = abs(arr[1]);
+	for (int i = 2; i < N; i++) {
+		if (norm < abs(arr[i])) {
+			norm = abs(arr[i]);
+		}
+	}
+	return norm;
+}
+//функция нахождения обратной матрицы
+void inversion(double A[][N])
+{
+	double temp;
+
+	double** E = new double* [N];
+
+	for (int i = 0; i < N; i++)
+		E[i] = new double[N];
+
+	for (int i = 0; i < N; i++)
+		for (int j = 0; j < N; j++)
+		{
+			E[i][j] = 0.0;
+
+			if (i == j)
+				E[i][j] = 1.0;
+		}
+
+	for (int k = 1; k < N; k++)
+	{
+		temp = A[k][k];
+
+		for (int j = 0; j < N; j++)
+		{
+			A[k][j] /= temp;
+			E[k][j] /= temp;
+		}
+
+		for (int i = k + 1; i < N; i++)
+		{
+			temp = A[i][k];
+
+			for (int j = 1; j < N; j++)
+			{
+				A[i][j] -= A[k][j] * temp;
+				E[i][j] -= E[k][j] * temp;
+			}
+		}
+	}
+
+	for (int k = N - 1; k > 1; k--)
+	{
+		for (int i = k - 1; i >= 1; i--)
+		{
+			temp = A[i][k];
+
+			for (int j = 1; j < N; j++)
+			{
+				A[i][j] -= A[k][j] * temp;
+				E[i][j] -= E[k][j] * temp;
+			}
+		}
+	}
+
+	for (int i = 1; i < N; i++)
+		for (int j = 1; j < N; j++)
+			A[i][j] = E[i][j];
+
+	for (int i = 1; i < N; i++)
+		delete[] E[i];
+
+	delete[] E;
+}
+
+//Фунция для обусловленности матрицы
+double Obusl(double arr[][N]) {
+	double Rarr[N][N];//будет обратной матрицей входной матрицы
+	for (int i = 0; i < N; i++) {
+		for (int j = 0; j < N; j++) {
+			Rarr[i][j] = arr[i][j];
+		}
+	}
+	inversion(Rarr);
+	return (Norm(arr)*Norm(Rarr));
+}
 
 int main() {
 	double Kf[N][N];
@@ -142,8 +246,7 @@ int main() {
 		fi[i] = i;
 	}
 	//Показать матрицу
-	/*
-	for (int i = 1; i < N; i++) {
+	/*for (int i = 1; i < N; i++) {
 		for (int j = 1; j < N; j++) {
 			cout << Kf[i][j] << " ";
 			if (j == (N - 1)) {
@@ -151,6 +254,8 @@ int main() {
 			}				
 		}
 	}*/
+	//cout << "||A|| = " << Norm(Kf)<<endl;
+	cout << "obuslovlennost = " << Obusl(Kf)<<endl<<endl;
 	x = gauss(Kf, fi);
 	cout << "Gauss method" << endl;
 	for (int i = 1; i < N; i++)
@@ -187,10 +292,32 @@ int main() {
 		fi[i] = i;
 	}
 	
+	//вектор невязки
+	double nev[N] = {};
+	double sum;
+	for (int i = 1; i < N; i++) {
+		sum = 0;
+		for (int j = 1; j < N; j++) {
+			sum += Kf[i][j] * x[j];
+		}
+		nev[i] = sum - fi[i];
+	}
+	cout << "Norma neviazki = " << Norm2(nev) << endl;
+
+	//решение методом гаусса-зейделя
 	x = Zeidel(Kf,fi);
 	
 	for (int i = 1; i < N; i++)
 		cout << "x" << i << " = " << x[i] << endl;
 
+	for (int i = 1; i < N; i++) {
+		sum = 0;
+		for (int j = 1; j < N; j++) {
+			sum += Kf[i][j] * x[j];
+		}
+		nev[i] = sum - fi[i];
+	}
+	cout << "Norma neviazki = " << Norm2(nev) << endl;
 	return 0;
 }
+
